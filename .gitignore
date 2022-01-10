@@ -1,0 +1,10 @@
+# Gradle
+gradle
+.gradle
+gradlew
+gradlew.bat
+lib/build
+lib/bin
+
+# vscode
+.vscode

@@ -1,10 +1,14 @@
 package com.ghoulean.sudoku.utils;
 
-import com.ghoulean.sudoku.pojo.boards.Board9x9;
+import com.ghoulean.sudoku.boards.Board9x9;
 import com.ghoulean.sudoku.tokens.Token;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+@SuppressWarnings("checkstyle:HideUtilityClassConstructor")
 public class BoardTestUtils {
-    
+
     public static Board9x9 getBlankBoard9x9() {
         return new Board9x9();
     }

@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'jacoco'
+    id 'checkstyle'
 }
 
 repositories {
@@ -86,3 +87,6 @@ tasks.named('jacocoTestCoverageVerification') {
     }
 }
 
+checkstyle {
+    toolVersion '9.2.1';
+}

@@ -33,4 +33,15 @@ public final class DFSBacktrackingSolverTest {
         Assertions.assertEquals(solution, BoardTestUtils.getSolvedBoard9x9());
     }
 
+    @Test
+    void shouldSolveBoard16x16() {
+        Puzzle puzzle = new Puzzle(BoardTestUtils.getUnsolvedBoard16x16(),
+            TokenSetType.DEFAULT16X16,
+            ValidatorTestUtils.getDefault16x16Validators(TokenSetType.DEFAULT16X16));
+        Set<Board> solutions = dfsBacktrackingSolver.solve(puzzle);
+        Assertions.assertEquals(solutions.size(), 1);
+        Board solution = solutions.iterator().next();
+        Assertions.assertTrue(solution.isFilled());
+        Assertions.assertEquals(solution, BoardTestUtils.getSolvedBoard16x16());
+    }
 }

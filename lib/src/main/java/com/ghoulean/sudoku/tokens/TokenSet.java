@@ -15,7 +15,7 @@ public class TokenSet {
     private static final Set<Token> DEFAULT9X9_TOKENSET =
         EnumSet.range(Token.ONE, Token.NINE);
     private static final Set<Token> DEFAULT16X16_TOKENSET =
-        EnumSet.range(Token.ONE, Token.F);
+        EnumSet.range(Token.ONE, Token.G);
 
     private static final Map<TokenSetType, Set<Token>> TOKENSET_MAP =
         Map.ofEntries(

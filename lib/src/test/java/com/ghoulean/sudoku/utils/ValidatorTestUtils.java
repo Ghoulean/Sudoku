@@ -6,6 +6,7 @@ import com.ghoulean.sudoku.tokens.TokenSetType;
 import com.ghoulean.sudoku.validators.AbstractValidator;
 import com.ghoulean.sudoku.validators.ColumnValidator;
 import com.ghoulean.sudoku.validators.Grid3x3Validator;
+import com.ghoulean.sudoku.validators.Grid4x4Validator;
 import com.ghoulean.sudoku.validators.RowValidator;
 import com.ghoulean.sudoku.validators.TokenSetValidator;
 
@@ -20,5 +21,12 @@ public class ValidatorTestUtils {
                       new ColumnValidator(tokenSetType),
                       new RowValidator(tokenSetType),
                       new Grid3x3Validator(tokenSetType));
+    }
+
+    public static Set<AbstractValidator> getDefault16x16Validators(final TokenSetType tokenSetType) {
+        return Set.of(new TokenSetValidator(tokenSetType),
+                      new ColumnValidator(tokenSetType),
+                      new RowValidator(tokenSetType),
+                      new Grid4x4Validator(tokenSetType));
     }
 }

@@ -17,7 +17,8 @@ public enum Token {
     C("C"),
     D("D"),
     E("E"),
-    F("F");
+    F("F"),
+    G("G");
 
     private final String shortName;
 

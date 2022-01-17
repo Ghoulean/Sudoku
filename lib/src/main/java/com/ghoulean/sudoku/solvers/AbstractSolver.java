@@ -19,15 +19,14 @@ public abstract class AbstractSolver<T extends Board> {
      * Helper method that checks whether a board is in an invalid state
      * @param board board
      * @param validators set of validators to check against
-     * @return false if any validator fails validation and true otherwise
+     * @return true if any validator fails validation and false otherwise
      */
-    protected boolean isInViolation(final Board board,
-                                    final Set<AbstractValidator> validators) {
+    protected boolean isInViolation(final Board board, final Set<AbstractValidator> validators) {
         for (AbstractValidator validator: validators) {
             if (!validator.validate(board)) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }

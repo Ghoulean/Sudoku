@@ -2,9 +2,14 @@ package com.ghoulean.sudoku.validators;
 
 import com.ghoulean.sudoku.boards.Board;
 import com.ghoulean.sudoku.tokens.Token;
+import com.ghoulean.sudoku.tokens.TokenSet;
 import com.ghoulean.sudoku.tokens.TokenSetType;
 
+import lombok.Getter;
+import lombok.NonNull;
+
 import java.util.LinkedList;
+import java.util.Set;
 
 public final class Grid3x3Validator extends AbstractValidator {
 
@@ -13,6 +18,9 @@ public final class Grid3x3Validator extends AbstractValidator {
     private static final int RIGHT_SUBGRID_OFFSET = 2;
     private static final int BOT_SUBGRID_OFFSET = 2;
 
+    @NonNull @Getter private final TokenSetType tokenSetType;
+    @NonNull @Getter private final Set<Token> tokenSet;
+
     /**
      * Enforces that every token is unique per 3x3 grid, where each grid is aligned on 3 tiles. On a standard 9x9 board,
      * this is the typical grid seen. On non-9x9 boards, if there is any remainder on the right and bottom edges, they
@@ -20,7 +28,8 @@ public final class Grid3x3Validator extends AbstractValidator {
      * @param tokenSetType tokenset to use
      */
     public Grid3x3Validator(final TokenSetType tokenSetType) {
-        super(tokenSetType);
+        this.tokenSetType = tokenSetType;
+        this.tokenSet = TokenSet.getTokenSet(tokenSetType);
     }
 
     @Override

@@ -93,6 +93,10 @@ public class Board implements Serializable {
         return true;
     }
 
+    /**
+     * String representation of board. Do not write test cases for this method; it is primarily used for debug purposes
+     * and subject to change at any time.
+     */
     @Override
     public final String toString() {
         String retval = "";

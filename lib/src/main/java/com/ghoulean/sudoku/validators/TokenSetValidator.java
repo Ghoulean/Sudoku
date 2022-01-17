@@ -2,16 +2,25 @@ package com.ghoulean.sudoku.validators;
 
 import com.ghoulean.sudoku.boards.Board;
 import com.ghoulean.sudoku.tokens.Token;
+import com.ghoulean.sudoku.tokens.TokenSet;
 import com.ghoulean.sudoku.tokens.TokenSetType;
+
+import lombok.Getter;
+import lombok.NonNull;
+
+import java.util.Set;
 
 public final class TokenSetValidator extends AbstractValidator {
 
+    @NonNull @Getter private final TokenSetType tokenSetType;
+    @NonNull @Getter private final Set<Token> tokenSet;
     /**
      * Enforces that the board only contains tokens from the specified tokenset
      * @param tokenSetType tokenset to use
      */
     public TokenSetValidator(final TokenSetType tokenSetType) {
-        super(tokenSetType);
+        this.tokenSetType = tokenSetType;
+        this.tokenSet = TokenSet.getTokenSet(tokenSetType);
     }
 
     @Override

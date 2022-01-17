@@ -2,11 +2,19 @@ package com.ghoulean.sudoku.validators;
 
 import com.ghoulean.sudoku.boards.Board;
 import com.ghoulean.sudoku.tokens.Token;
+import com.ghoulean.sudoku.tokens.TokenSet;
 import com.ghoulean.sudoku.tokens.TokenSetType;
 
+import lombok.Getter;
+import lombok.NonNull;
+
 import java.util.LinkedList;
+import java.util.Set;
 
 public final class ColumnValidator extends AbstractValidator {
+
+    @NonNull @Getter private final TokenSetType tokenSetType;
+    @NonNull @Getter private final Set<Token> tokenSet;
 
     /**
      * Enforces that every token is unique per column. In other words, every token appears at most once in every column
@@ -14,7 +22,8 @@ public final class ColumnValidator extends AbstractValidator {
      * @param tokenSetType tokenset to use
      */
     public ColumnValidator(final TokenSetType tokenSetType) {
-        super(tokenSetType);
+        this.tokenSetType = tokenSetType;
+        this.tokenSet = TokenSet.getTokenSet(tokenSetType);
     }
 
     @Override

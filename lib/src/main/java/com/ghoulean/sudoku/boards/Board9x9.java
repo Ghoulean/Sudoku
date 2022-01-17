@@ -16,9 +16,4 @@ public class Board9x9 extends Board {
     public Board9x9(final Board9x9 board) {
         super(board);
     }
-
-    /** Hide unused constructor */
-    private Board9x9(final int width, final int height) {
-        super(WIDTH, HEIGHT);
-    }
 }

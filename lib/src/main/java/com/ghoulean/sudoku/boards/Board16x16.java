@@ -16,9 +16,4 @@ public class Board16x16 extends Board {
     public Board16x16(final Board16x16 board) {
         super(board);
     }
-
-    /** Hide unused constructor */
-    private Board16x16(final int width, final int height) {
-        super(WIDTH, HEIGHT);
-    }
 }

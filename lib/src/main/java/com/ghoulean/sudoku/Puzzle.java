@@ -9,18 +9,18 @@ import com.ghoulean.sudoku.validators.AbstractValidator;
 import lombok.Getter;
 import lombok.NonNull;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public class Puzzle {
+public class Puzzle implements Serializable {
     @NonNull @Getter private final Board startingBoard;
-    @NonNull @Getter private final Board currentBoard;
     @NonNull @Getter private final TokenSetType tokenSetType;
     @NonNull private final Set<Token> tokenSet;
     @NonNull @Getter private final Set<AbstractValidator> validators;
 
     /**
-     * Encodes the gamestate of a Sudoku game. It holds the starting position, the set of valid tokens, and the set of
-     * validators that the solution will be tested against.
+     * Encodes the gamestate of a Sudoku game. It holds an immutable copy of the starting position, the set of valid
+     * tokens, and the set of validators that the solution will be tested against.
      *
      * Unlike "true" Sudoku puzzles, a Puzzle may have any number of solutions.
      *
@@ -31,9 +31,8 @@ public class Puzzle {
     public Puzzle(final Board startingBoard,
                   final TokenSetType tokenSetType,
                   final Set<AbstractValidator> validators) {
-        this.startingBoard = startingBoard;
+        this.startingBoard = new Board(startingBoard);
         this.startingBoard.lock();
-        this.currentBoard = new Board(startingBoard);
         this.tokenSetType = tokenSetType;
         this.tokenSet = TokenSet.getTokenSet(tokenSetType);
         this.validators = validators;
@@ -49,4 +48,26 @@ public class Puzzle {
     public boolean isStarting(final int x, final int y) {
         return !this.startingBoard.get(x, y).equals(Token.BLANK);
     }
+
+    /**
+     * Checks whether a given board is a solution to the puzzle.
+     * @param board Board to check
+     * @return true if the board is a solution and false otherwise
+     */
+    public boolean isSolved(final Board board) {
+        for (int i = 0; i < board.getWidth(); i += 1) {
+            for (int j = 0; j < board.getHeight(); j += 1) {
+                if (board.get(i, j).equals(Token.BLANK) || board.get(i, j).equals(Token.INVALID)) {
+                    return false;
+                }
+            }
+        }
+        for (AbstractValidator validator: validators) {
+            if (!validator.validate(board)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

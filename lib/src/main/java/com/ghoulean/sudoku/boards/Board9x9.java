@@ -16,4 +16,12 @@ public class Board9x9 extends Board {
     public Board9x9(final Board9x9 board) {
         super(board);
     }
+
+    /** Create copy of a board that is 9x9*/
+    public Board9x9(final Board board) {
+        super(board);
+        if (board.getWidth() != WIDTH || board.getHeight() != HEIGHT) {
+            throw new IllegalArgumentException("Board is not 9x9");
+        }
+    }
 }

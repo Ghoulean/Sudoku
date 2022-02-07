@@ -1,7 +1,7 @@
 package com.ghoulean.sudoku.solvers;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -14,50 +14,62 @@ import com.ghoulean.sudoku.validators.AbstractValidator;
 
 public class DFSBacktrackingSolver extends AbstractSolver<Board> {
 
-    private static final int MAX_ITERATIONS = 999999;
+    private static final int MAX_ITERATIONS_PER_SOLUTION = 999999;
 
     /**
-     * Find solutions using DFS search, from left to right then up to down
+     * Find solutions using DFS search, from left to right then up to down. If a solution is not found by
+     * MAX_ITERATIONS_PER_SOLUTION iterations, terminate the search. The iteration count resets when a solution is
+     * found.
      */
     @Override
     public Set<Board> solve(final Puzzle puzzle) {
-        final Board solution = findSolution(puzzle);
-        if (solution == null) {
-            return Collections.emptySet();
-        }
-        return Collections.singleton(solution);
-    }
+        final Set<Board> solutions = new HashSet<>();
 
-    private Board findSolution(final Puzzle puzzle) {
+        Board solution = new Board(puzzle.getStartingBoard());
         final Set<Token> tokenSet = TokenSet.getTokenSet(puzzle.getTokenSetType());
         final List<Token> tokenList = new ArrayList<Token>(tokenSet);
-        final Board board = new Board(puzzle.getStartingBoard());
         final Set<AbstractValidator> validators = puzzle.getValidators();
-
         List<Integer> blankX = new LinkedList<>();
         List<Integer> blankY = new LinkedList<>();
-        for (int i = 0; i < board.getWidth(); i += 1) {
-            for (int j = 0; j < board.getHeight(); j += 1) {
+        for (int i = 0; i < solution.getWidth(); i += 1) {
+            for (int j = 0; j < solution.getHeight(); j += 1) {
                 if (!puzzle.isStarting(i, j)) {
                     blankX.add(i);
                     blankY.add(j);
                 }
             }
         }
-        int i = 0;
+
+        solution = findSolution(tokenList, validators, solution, blankX, blankY, 0);
+        while (solution != null) {
+            final Board copySolution = new Board(solution);
+            copySolution.lock();
+            solutions.add(copySolution);
+            solution = findSolution(tokenList, validators, solution, blankX, blankY, blankX.size() - 1);
+        }
+        return solutions;
+    }
+
+    private Board findSolution(final List<Token> tokenList,
+                               final Set<AbstractValidator> validators,
+                               final Board board,
+                               final List<Integer> blankX,
+                               final List<Integer> blankY,
+                               final int startIndex) {
+        int index = startIndex;
         int attempts = 0;
-        boolean forceChange = false;
-        while (i < blankX.size()) {
-            if (attempts >= MAX_ITERATIONS) {
+        boolean forceChange = true;
+        while (index < blankX.size()) {
+            if (attempts >= MAX_ITERATIONS_PER_SOLUTION) {
                 System.out.println(board.toString());
                 return null;
             }
             attempts += 1;
-            if (i < 0) {
+            if (index < 0) {
                 return null;
             }
-            int x = blankX.get(i);
-            int y = blankY.get(i);
+            int x = blankX.get(index);
+            int y = blankY.get(index);
             if (board.get(x, y).equals(Token.BLANK)) {
                 board.set(x, y, tokenList.get(0));
             } else if (forceChange || this.isInViolation(board, validators)) {
@@ -65,7 +77,7 @@ public class DFSBacktrackingSolver extends AbstractSolver<Board> {
                 int nextIndex = tokenList.indexOf(board.get(x, y)) + 1;
                 Token nextToken;
                 if (nextIndex >= tokenList.size()) {
-                    i -= 1;
+                    index -= 1;
                     forceChange = true;
                     nextToken = Token.BLANK;
                 } else {
@@ -73,7 +85,7 @@ public class DFSBacktrackingSolver extends AbstractSolver<Board> {
                 }
                 board.set(x, y, nextToken);
             } else {
-                i += 1;
+                index += 1;
             }
         }
         return board;

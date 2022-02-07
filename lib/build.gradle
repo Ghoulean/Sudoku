@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'jacoco'
     id 'checkstyle'
+    // Pretty print test output
     id 'com.adarshr.test-logger' version '3.1.0'
 }
 
@@ -10,6 +11,8 @@ repositories {
 }
 
 dependencies {
+    // Apache Commons Lang
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
     // lombok
 	compileOnly 'org.projectlombok:lombok:1.18.22'
 	annotationProcessor 'org.projectlombok:lombok:1.18.22'
@@ -30,11 +33,6 @@ dependencies {
 }
 
 version = '0.1.0'
-
-tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
 
 tasks.named('jar') {
     manifest {
@@ -59,8 +57,11 @@ tasks.named('test') {
 }
 
 tasks.named('jacocoTestReport') {
+    dependsOn test
+    enabled = false
     reports {
-        xml.required = false
+        html.required = true
+        xml.required = true
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
@@ -68,21 +69,12 @@ tasks.named('jacocoTestReport') {
 
 tasks.named('jacocoTestCoverageVerification') {
     violationRules {
+        failOnViolation = true
         rule {
-            limit {
-                minimum = 0.5
-            }
-        }
-
-        rule {
-            enabled = false
             element = 'CLASS'
-            includes = ['*']
-
+            excludes = ['com.ghoulean.sudoku.boards.*', 'com.ghoulean.sudoku.helper.*']
             limit {
-                counter = 'LINE'
-                value = 'TOTALCOUNT'
-                maximum = 0.3
+                minimum = 0.80
             }
         }
     }
@@ -90,4 +82,8 @@ tasks.named('jacocoTestCoverageVerification') {
 
 checkstyle {
     toolVersion '9.2.1';
+}
+
+tasks.named("check") {
+    dependsOn jacocoTestCoverageVerification
 }

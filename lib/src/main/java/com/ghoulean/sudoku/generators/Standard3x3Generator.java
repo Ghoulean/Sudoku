@@ -48,23 +48,25 @@ public final class Standard3x3Generator extends AbstractGenerator {
     public Puzzle generate() {
         Board9x9 board = getSeedBoard();
         int hints = board.getHeight() * board.getWidth();
-        int attempts = 0;
         while (!terminateHintRemoval(hints)) {
-            attempts += 1;
-            if (attempts > MAX_REMOVAL_ATTEMPTS) {
-                throw new IllegalStateException("Can't finish generating board");
-            }
             hints -= tryRemove(board);
         }
         return new Puzzle(board, TOKEN_SET_TYPE, VALIDATORS);
     }
 
     private int tryRemove(final Board board) {
-        final int x = RandomUtils.nextInt(0, board.getWidth());
-        final int y = RandomUtils.nextInt(0, board.getHeight());
-        final Token t = board.get(x, y);
-        if (t.equals(Token.BLANK)) {
-            return 0;
+        int x;
+        int y;
+        Token t;
+        int attempts = 0;
+        do {
+            attempts += 1;
+            x = RandomUtils.nextInt(0, board.getWidth());
+            y = RandomUtils.nextInt(0, board.getHeight());
+            t = board.get(x, y);
+        } while (t.equals(Token.BLANK) && attempts <= MAX_REMOVAL_ATTEMPTS);
+        if (attempts > MAX_REMOVAL_ATTEMPTS) {
+            throw new IllegalStateException("Can't finish generating board");
         }
         board.set(x, y, Token.BLANK);
         if (!hasExactlyOneSolution(board)) {

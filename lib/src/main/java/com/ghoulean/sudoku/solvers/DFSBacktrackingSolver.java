@@ -61,7 +61,6 @@ public class DFSBacktrackingSolver extends AbstractSolver<Board> {
         boolean forceChange = true;
         while (index < blankX.size()) {
             if (attempts >= MAX_ITERATIONS_PER_SOLUTION) {
-                System.out.println(board.toString());
                 return null;
             }
             attempts += 1;

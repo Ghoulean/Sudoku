@@ -91,6 +91,11 @@ tasks.named("check") {
 
 
 publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+    }
+  }
   repositories {
     maven {
       name = "GitHubPackages"

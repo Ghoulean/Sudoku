@@ -93,6 +93,10 @@ tasks.named("check") {
 publishing {
   publications {
     mavenJava(MavenPublication) {
+      groupId 'com.ghoulean'
+      artifactId 'sudoku'
+      version '0.1.0'
+
       from components.java
     }
   }

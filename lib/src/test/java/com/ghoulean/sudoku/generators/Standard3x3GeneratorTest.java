@@ -1,6 +1,8 @@
 package com.ghoulean.sudoku.generators;
 
-import java.util.concurrent.TimeUnit;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+
+import java.time.Duration;
 
 import com.ghoulean.sudoku.Puzzle;
 import com.ghoulean.sudoku.solvers.Standard3x3Solver;
@@ -8,7 +10,6 @@ import com.ghoulean.sudoku.solvers.Standard3x3Solver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 
 public final class Standard3x3GeneratorTest {
 
@@ -22,10 +23,10 @@ public final class Standard3x3GeneratorTest {
     }
 
     @Test
-    @Timeout(value = 2, unit = TimeUnit.MINUTES)
     void shouldGeneratePuzzleWithExactlyOneSolution() {
-        final Puzzle puzzle = standard3x3Generator.generate();
-        System.out.println(puzzle.getStartingBoard().toString());
-        Assertions.assertEquals(standard3x3Solver.solve(puzzle).size(), 1);
+        assertTimeoutPreemptively(Duration.ofMinutes(5), () -> {
+            final Puzzle puzzle = standard3x3Generator.generate();
+            Assertions.assertEquals(standard3x3Solver.solve(puzzle).size(), 1);
+        });
     }
 }

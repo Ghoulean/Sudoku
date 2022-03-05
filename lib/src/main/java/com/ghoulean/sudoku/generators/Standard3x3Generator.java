@@ -1,8 +1,8 @@
 package com.ghoulean.sudoku.generators;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -40,8 +40,7 @@ public final class Standard3x3Generator extends AbstractGenerator {
 
     private static final List<Token> TOKEN_LIST = new ArrayList<Token>(TOKEN_SET);
 
-    private static final int MAX_SEEDING_ATTEMPTS = 30;
-    private static final int SEEDING_HINTS = 15;
+    private static final int GRID_SIZE = 3;
     private static final int LOWER_HINT_LIMIT = 20;
     private static final int UPPER_HINT_LIMIT = 36;
     private static final int MAX_REMOVAL_ATTEMPTS = 81;
@@ -56,27 +55,19 @@ public final class Standard3x3Generator extends AbstractGenerator {
         int hints = board.getHeight() * board.getWidth();
         Collections.shuffle(pseudorandomCoordinateList);
         final int hintLimit = RandomUtils.nextInt(LOWER_HINT_LIMIT, UPPER_HINT_LIMIT);
-        while (hints > hintLimit) {
+        int squaresTested = 0;
+        while (hints > hintLimit && squaresTested <= MAX_REMOVAL_ATTEMPTS) {
             hints -= tryRemove(board);
+            squaresTested += 1;
         }
         return new Puzzle(board, TOKEN_SET_TYPE, VALIDATORS);
     }
 
     private int tryRemove(final Board board) {
-        int x;
-        int y;
-        Token t;
-        int attempts = 0;
-        do {
-            attempts += 1;
-            final Coordinate randomCoordinate = getNextPseudorandomCoordinate();
-            x = randomCoordinate.getX();
-            y = randomCoordinate.getY();
-            t = board.get(x, y);
-        } while (t.equals(Token.BLANK) && attempts <= MAX_REMOVAL_ATTEMPTS);
-        if (attempts > MAX_REMOVAL_ATTEMPTS) {
-            throw new IllegalStateException("Can't finish generating board");
-        }
+        final Coordinate randomCoordinate = getNextPseudorandomCoordinate();
+        final int x = randomCoordinate.getX();
+        final int y = randomCoordinate.getY();
+        final Token t = board.get(x, y);
         board.set(x, y, Token.BLANK);
         if (!hasExactlyOneSolution(board)) {
             board.set(x, y, t);
@@ -90,43 +81,10 @@ public final class Standard3x3Generator extends AbstractGenerator {
     }
 
     private Board9x9 getSeedBoard() {
-        Set<Board9x9> boards = new HashSet<>();
-        int seedingAttempts = 0;
-        do {
-            seedingAttempts += 1;
-            if (seedingAttempts > MAX_SEEDING_ATTEMPTS) {
-                throw new IllegalStateException("Cannot find a seeding position during generation");
-            }
-            final Board9x9 initialSeedingBoard = new Board9x9();
-            for (int i = 0; i < SEEDING_HINTS; i += 1) {
-                randomPlace(initialSeedingBoard);
-            }
-            try {
-                boards = STANDARD_3X3_SOLVER.solve(new Puzzle(initialSeedingBoard, TOKEN_SET_TYPE, VALIDATORS));
-            } catch (IllegalStateException e) {
-                continue;
-            }
-        } while (boards.isEmpty());
-        final Board9x9 board = boards.iterator().next();
-        return board;
-    }
-
-    private void randomPlace(final Board board) {
-        while (true) {
-            final Coordinate randomCoordinate = getNextPseudorandomCoordinate();
-            final int x = randomCoordinate.getX();
-            final int y = randomCoordinate.getY();
-            if (board.get(x, y).equals(Token.BLANK)) {
-                final int i = RandomUtils.nextInt(0, TOKEN_LIST.size());
-                final Token token = TOKEN_LIST.get(i);
-                board.set(x, y, token);
-                if (isInViolation(board, VALIDATORS)) {
-                    board.set(x, y, Token.BLANK);
-                } else {
-                    return;
-                }
-            }
-        }
+        final Board initialSeedingBoard = new Board(Board9x9.WIDTH, Board9x9.HEIGHT,
+            "123456789456789123789123456231564897564897231897231564312645978645978312978312645");
+        scrambleBoard(initialSeedingBoard);
+        return new Board9x9(initialSeedingBoard);
     }
 
     private ArrayList<Coordinate> populateCoordinateList() {
@@ -144,12 +102,96 @@ public final class Standard3x3Generator extends AbstractGenerator {
         return pseudorandomCoordinateList.get(pseudorandomIndex);
     }
 
-    private boolean isInViolation(final Board board, final Set<AbstractValidator> validators) {
-        for (AbstractValidator validator: validators) {
-            if (!validator.validate(board)) {
-                return true;
+    private void scrambleBoard(final Board board) {
+        shuffleNumbers(board);
+        shuffleColumnsInBlock(board, 0);
+        shuffleColumnsInBlock(board, GRID_SIZE);
+        shuffleColumnsInBlock(board, 2 * GRID_SIZE);
+        shuffleRowsInBlock(board, 0);
+        shuffleRowsInBlock(board, GRID_SIZE);
+        shuffleRowsInBlock(board, 2 * GRID_SIZE);
+        shuffleBlockRows(board);
+        shuffleBlockColumns(board);
+    }
+
+    private void shuffleNumbers(final Board board) {
+        ArrayList<Token> permutation = new ArrayList<Token>(TOKEN_SET);
+        Collections.shuffle(permutation);
+        for (int i = 0; i < board.getWidth(); i += 1) {
+            for (int j = 0; j < board.getHeight(); j += 1) {
+                int index = TOKEN_LIST.indexOf(board.get(i, j));
+                board.set(i, j, permutation.get(index));
             }
         }
-        return false;
+    }
+
+    private void shuffleColumnsInBlock(final Board board, final int leftColumnIndex) {
+        final Board helper = new Board(Board9x9.WIDTH, Board9x9.HEIGHT);
+        ArrayList<Integer> columnShuffle = threeShuffle();
+        for (int i = leftColumnIndex; i < leftColumnIndex + GRID_SIZE; i += 1) {
+            final int newX = columnShuffle.get(i - leftColumnIndex) + leftColumnIndex;
+            for (int j = 0; j < Board9x9.HEIGHT; j += 1) {
+                helper.set(newX, j, board.get(i, j));
+            }
+        }
+        for (int i = leftColumnIndex; i < leftColumnIndex + GRID_SIZE; i += 1) {
+            for (int j = 0; j < Board9x9.HEIGHT; j += 1) {
+                board.set(i, j, helper.get(i, j));
+            }
+        }
+    }
+
+    private void shuffleRowsInBlock(final Board board, final int topRowIndex) {
+        final Board helper = new Board(Board9x9.WIDTH, Board9x9.HEIGHT);
+        ArrayList<Integer> rowShuffle = threeShuffle();
+        for (int i = topRowIndex; i < topRowIndex + GRID_SIZE; i += 1) {
+            final int newY = rowShuffle.get(i - topRowIndex) + topRowIndex;
+            for (int j = 0; j < Board9x9.WIDTH; j += 1) {
+                helper.set(j, newY, board.get(j, i));
+            }
+        }
+        for (int i = topRowIndex; i < topRowIndex + GRID_SIZE; i += 1) {
+            for (int j = 0; j < Board9x9.WIDTH; j += 1) {
+                board.set(j, i, helper.get(j, i));
+            }
+        }
+    }
+
+    private void shuffleBlockColumns(final Board board) {
+        final Board helper = new Board(Board9x9.WIDTH, Board9x9.HEIGHT);
+        ArrayList<Integer> columnShuffle = threeShuffle();
+        for (int i = 0; i < Board9x9.WIDTH; i += 1) {
+            final int newX = columnShuffle.get(i / GRID_SIZE) * GRID_SIZE + (i % GRID_SIZE);
+            for (int j = 0; j < Board9x9.HEIGHT; j += 1) {
+                helper.set(newX, j, board.get(i, j));
+            }
+        }
+        for (int i = 0; i < Board9x9.WIDTH; i += 1) {
+            for (int j = 0; j < Board9x9.HEIGHT; j += 1) {
+                board.set(i, j, helper.get(i, j));
+            }
+        }
+    }
+
+    private void shuffleBlockRows(final Board board) {
+        final Board helper = new Board(Board9x9.WIDTH, Board9x9.HEIGHT);
+        ArrayList<Integer> rowShuffle = threeShuffle();
+        for (int j = 0; j < Board9x9.HEIGHT; j += 1) {
+            final int newY = rowShuffle.get(j / GRID_SIZE) * GRID_SIZE + (j % GRID_SIZE);
+            for (int i = 0; i < Board9x9.WIDTH; i += 1) {
+                helper.set(i, newY, board.get(i, j));
+            }
+        }
+        for (int i = 0; i < Board9x9.WIDTH; i += 1) {
+            for (int j = 0; j < Board9x9.HEIGHT; j += 1) {
+                board.set(i, j, helper.get(i, j));
+            }
+        }
+    }
+
+    private ArrayList<Integer> threeShuffle() {
+        ArrayList<Integer> permutation = new ArrayList<Integer>(Arrays.asList(0, 1, 2));
+        Collections.shuffle(permutation);
+        return permutation;
     }
 }

@@ -26,6 +26,26 @@ public enum Token {
        this.shortName = shortName;
     }
 
+    /**
+     * @return short name
+     */
+    public String getShortName() {
+        return this.shortName;
+    }
+
+    /**
+     * @param shortName Short name
+     * @return the token corresponding to the given short name
+     */
+    public static Token fromShortName(final String shortName) {
+        for (Token t : Token.values()) {
+            if (t.getShortName().equals(shortName)) {
+                return t;
+            }
+        }
+        throw new IllegalArgumentException("No token with short name " + shortName);
+    }
+
     @Override
     public String toString() {
         return shortName;

@@ -33,8 +33,6 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
 }
 
-version = '0.1.6'
-
 tasks.named('jar') {
     manifest {
         attributes('Implementation-Title': project.name,
@@ -95,7 +93,7 @@ publishing {
     mavenJava(MavenPublication) {
       groupId 'com.ghoulean'
       artifactId 'sudoku'
-      version '0.1.6'
+      version '0.1.7'
 
       from components.java
     }

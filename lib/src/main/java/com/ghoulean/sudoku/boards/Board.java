@@ -48,6 +48,28 @@ public class Board implements Serializable {
     }
 
     /**
+     * Builds a Sudoku board from a string of tokens, inferring their location
+     * from their position in the string
+     * @param tokenString string representation of tokens
+     */
+    public Board(final int width, final int height, final String tokenString) {
+        this.width = width;
+        this.height = height;
+        this.mutable = true;
+        if (tokenString.length() != this.width * this.height) {
+            throw new IllegalArgumentException("Token string is of wrong length");
+        }
+        this.board = new Token[this.width][this.height];
+        int k = 0;
+        for (int i = 0; i < this.width; i += 1) {
+            for (int j = 0; j < this.height; j += 1) {
+                set(i, j, Token.fromShortName(String.valueOf(tokenString.charAt(k))));
+                k += 1;
+            }
+        }
+    }
+
+    /**
      * Prevent the board from receiving any further modifications
      */
     public final void lock() {

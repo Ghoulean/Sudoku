@@ -6,6 +6,7 @@ import java.time.Duration;
 
 import com.ghoulean.sudoku.Puzzle;
 import com.ghoulean.sudoku.solvers.Standard3x3Solver;
+import com.ghoulean.sudoku.validators.AbstractValidator;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,10 +24,20 @@ public final class Standard3x3GeneratorTest {
     }
 
     @Test
-    void shouldGeneratePuzzleWithExactlyOneSolution() {
-        assertTimeoutPreemptively(Duration.ofMinutes(5), () -> {
+    void shouldGenerateValidStartingBoard() {
+        assertTimeoutPreemptively(Duration.ofMinutes(1), () -> {
             final Puzzle puzzle = standard3x3Generator.generate();
-            Assertions.assertEquals(standard3x3Solver.solve(puzzle).size(), 1);
+            for (AbstractValidator v: puzzle.getValidators()) {
+                Assertions.assertTrue(v.validate(puzzle.getStartingBoard()));
+            }
+        });
+    }
+
+    @Test
+    void shouldGeneratePuzzleWithExactlyOneSolution() {
+        assertTimeoutPreemptively(Duration.ofMinutes(1), () -> {
+            final Puzzle puzzle = standard3x3Generator.generate();
+            Assertions.assertEquals(1, standard3x3Solver.solve(puzzle).size());
         });
     }
 }

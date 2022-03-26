@@ -2,11 +2,8 @@ package com.ghoulean.sudoku.generators;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.commons.lang3.RandomUtils;
 
 import com.ghoulean.sudoku.Puzzle;
 import com.ghoulean.sudoku.boards.Board;
@@ -21,6 +18,10 @@ import com.ghoulean.sudoku.validators.ColumnValidator;
 import com.ghoulean.sudoku.validators.Grid3x3Validator;
 import com.ghoulean.sudoku.validators.RowValidator;
 import com.ghoulean.sudoku.validators.TokenSetValidator;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.simple.RandomSource;
+import org.apache.commons.rng.sampling.ListSampler;
 
 public final class Standard3x3Generator extends AbstractGenerator {
 
@@ -46,15 +47,20 @@ public final class Standard3x3Generator extends AbstractGenerator {
     private static final int MAX_REMOVAL_ATTEMPTS = 81;
     private static final Standard3x3Solver STANDARD_3X3_SOLVER = new Standard3x3Solver();
 
+    private static final String SEED_BOARD =
+        "123456789456789123789123456231564897564897231897231564312645978645978312978312645";
+
     private final List<Coordinate> pseudorandomCoordinateList = populateCoordinateList();
     private int pseudorandomIndex = 0;
+
+    private final UniformRandomProvider rng = RandomSource.MT.create();
 
     @Override
     public Puzzle generate() {
         Board9x9 board = getSeedBoard();
         int hints = board.getHeight() * board.getWidth();
-        Collections.shuffle(pseudorandomCoordinateList);
-        final int hintLimit = RandomUtils.nextInt(LOWER_HINT_LIMIT, UPPER_HINT_LIMIT);
+        ListSampler.shuffle(rng, pseudorandomCoordinateList);
+        final int hintLimit = rng.nextInt(UPPER_HINT_LIMIT - LOWER_HINT_LIMIT) + LOWER_HINT_LIMIT;
         int squaresTested = 0;
         while (hints > hintLimit && squaresTested <= MAX_REMOVAL_ATTEMPTS) {
             hints -= tryRemove(board);
@@ -81,8 +87,7 @@ public final class Standard3x3Generator extends AbstractGenerator {
     }
 
     private Board9x9 getSeedBoard() {
-        final Board initialSeedingBoard = new Board(Board9x9.WIDTH, Board9x9.HEIGHT,
-            "123456789456789123789123456231564897564897231897231564312645978645978312978312645");
+        final Board initialSeedingBoard = new Board(Board9x9.WIDTH, Board9x9.HEIGHT, SEED_BOARD);
         scrambleBoard(initialSeedingBoard);
         return new Board9x9(initialSeedingBoard);
     }
@@ -116,7 +121,7 @@ public final class Standard3x3Generator extends AbstractGenerator {
 
     private void shuffleNumbers(final Board board) {
         ArrayList<Token> permutation = new ArrayList<Token>(TOKEN_SET);
-        Collections.shuffle(permutation);
+        ListSampler.shuffle(rng, permutation);
         for (int i = 0; i < board.getWidth(); i += 1) {
             for (int j = 0; j < board.getHeight(); j += 1) {
                 int index = TOKEN_LIST.indexOf(board.get(i, j));
@@ -191,7 +196,7 @@ public final class Standard3x3Generator extends AbstractGenerator {
 
     private ArrayList<Integer> threeShuffle() {
         ArrayList<Integer> permutation = new ArrayList<Integer>(Arrays.asList(0, 1, 2));
-        Collections.shuffle(permutation);
+        ListSampler.shuffle(rng, permutation);
         return permutation;
     }
 }

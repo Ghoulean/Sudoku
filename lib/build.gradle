@@ -12,22 +12,16 @@ repositories {
 }
 
 dependencies {
-    // Apache Commons Lang
+    // Apache Commons
     implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'org.apache.commons:commons-rng-core:1.4'
+    implementation 'org.apache.commons:commons-rng-sampling:1.4'
+    implementation 'org.apache.commons:commons-rng-simple:1.4'
     // lombok
 	compileOnly 'org.projectlombok:lombok:1.18.22'
 	annotationProcessor 'org.projectlombok:lombok:1.18.22'
 	testCompileOnly 'org.projectlombok:lombok:1.18.22'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
-    // log4j
-    implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
-    runtimeOnly 'org.apache.logging.log4j:log4j-slf4j18-impl:2.13.0'
-    // Dagger 2
-    implementation 'com.google.dagger:dagger:2.40'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.40'
-    // Google Guava (preconditions)
-    implementation 'com.google.guava:guava:31.0.1-jre'
     // JUnit
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
@@ -93,7 +87,7 @@ publishing {
     mavenJava(MavenPublication) {
       groupId 'com.ghoulean'
       artifactId 'sudoku'
-      version '0.1.7'
+      version '0.1.8'
 
       from components.java
     }
